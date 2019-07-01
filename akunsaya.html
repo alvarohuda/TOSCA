@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>TOSCA</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/angular.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style type="text/css">
+   </style>
+</head>
+<body ng-app='fileUpload'>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow fixed-top bg-success">
+
+        <a class="navbar-brand ml-auto mr-auto" href="admin.html">TOSCA</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+                <a class="slo nav-link " href="#">
+                    <img src="assets/img/shopping-cart.png" alt="" width="30px" height="25px"> <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Link</a>
+            </li> 
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Disabled</a>
+            </li>
+            </ul> 
+        </div>
+    </nav> 
+    <H1 class="text-akun"> AKUN SAYA</H1>
+    <br>
+    <div ng-app="fileUpload" class="container ">
+        <div class="row"ng-controller="upload">
+        <div class="col-md-6"  >
+            <div class="profile">
+                <h3>Profil</h4 >
+                <img  ng-src="{{filepreview}}" witdh="300px" height="300px" src="assets/img/akun.png" alt="" class="" style="width: 300px; hight:300px"><br>
+                <input class="mt-5" type="file" fileinput="file" filepreview="filepreview"/>
+                <button type="button" class="mt-2" >Kamera</button>
+               
+            </div>
+        </div>
+        <div class="col-md-6" >
+            <div class="nama">
+                <h4>NAMA</h4>
+                <h5 style="background-color: gray">Admin Tosca</h5>
+                <h4>NO. TELP</h4>
+                <H5 style="background-color: gray">+62 896-5796-6717</H5><br>
+                <h4>ADD TESTIMONI</h4>
+                <img  ng-src="{{sspreview}}" witdh="200px" height="200px" src="assets/img/camera.png" alt="" class="mt-2" style="width: 200px; hight:200px"><br>
+                <input class="mt-5" type="file" fileinput="file" sspreview="sspreview"/><br><br>
+            </div>
+        </div>
+    </div>
+    <div class="row ">
+      <div class="col-md-11"></div>
+      <div class="col-md-1">
+        <button data-toggle="modal" data-target="#succes">upload</button>
+        <div class="modal" tabindex="-1" id="succes" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" style="color: green">Success</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Foto / Testimony Anda Berhasil di Upload</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+
+    <div class="footer fixed-bottom" align='center'>
+        @Tosca Extraordinary ©2019
+     </div>
+
+    <script>
+        console.clear();
+    angular.module('fileUpload', [])
+      .controller("upload", ['$scope', '$http', 'uploadService', function($scope, $http, uploadService) {
+        $scope.$watch('file', function(newfile, oldfile) {
+          if(angular.equals(newfile, oldfile) ){
+            return;
+          }
+    
+          uploadService.upload(newfile).then(function(res){
+            // DO SOMETHING WITH THE RESULT!
+            console.log("result", res);
+          })
+        });
+    
+      }])
+      .service("uploadService", function($http, $q) {
+    
+        return ({
+          upload: upload
+        });
+    
+        function upload(file) {
+          var upl = $http({
+            method: 'POST',
+            url: 'http://jsonplaceholder.typicode.com/posts', // /api/upload
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            },
+            data: {
+              upload: file
+            },
+            transformRequest: function(data, headersGetter) {
+              var formData = new FormData();
+              angular.forEach(data, function(value, key) {
+                formData.append(key, value);
+              });
+    
+              var headers = headersGetter();
+              delete headers['Content-Type'];
+    
+              return formData;
+            }
+          });
+          return upl.then(handleSuccess, handleError);
+    
+        } // End upload function
+    
+        // ---
+        // PRIVATE METHODS.
+        // ---
+      
+        function handleError(response, data) {
+          if (!angular.isObject(response.data) ||!response.data.message) {
+            return ($q.reject("An unknown error occurred."));
+          }
+    
+          return ($q.reject(response.data.message));
+        }
+    
+        function handleSuccess(response) {
+          return (response);
+        }
+    
+      })
+      .directive("fileinput", [function() {
+        return {
+          scope: {
+            fileinput: "=",
+            filepreview: "=",
+            sspreview:"="
+          },
+          link: function(scope, element, attributes) {
+            element.bind("change", function(changeEvent) {
+              scope.fileinput = changeEvent.target.files[0];
+              var reader = new FileReader();
+              reader.onload = function(loadEvent) {
+                scope.$apply(function() {
+                  scope.filepreview = loadEvent.target.result;
+                  scope.sspreview = loadEvent.target.result;
+                });
+              }
+              reader.readAsDataURL(scope.fileinput);
+            });
+          }
+        }
+      }]);
+    </script>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
